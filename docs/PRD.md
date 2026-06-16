@@ -1,8 +1,8 @@
 # Kavira — Product Requirements Document
 
 **Status:** Draft v1.0
-**Owner:** Calvin (clinztouch) — Lead Engineer
-**Last updated:** 2026-06-16
+**Owner:** Calvin (clinztouch) — Maintainer
+**Last updated:** 2026-06-16 (rev 2 — governance update: Maintainer title, module-scoped CODEOWNERS merge rights, dev/staging/prod branch flow)
 **License:** Apache 2.0
 **Repository:** github.com/kavira-oss/kavira
 
@@ -262,14 +262,24 @@ Shared validation schemas and TypeScript types live in `@kavira/types` so a DTO 
 ## 9. Contributor Structure & Governance
 
 **Roles:**
-- **Lead Engineer (Calvin)** — architecture authority, merge rights, sets conventions
-- **Senior Reviewer** — co-reviews all PRs, owns a specific domain (analytics or mobile, TBD)
-- **Contributors** — assigned to specific modules/issues, not general-purpose
+- **Maintainer (Calvin)** — architecture authority, repo-wide merge rights, sets conventions, final say on disputes
+- **Senior Reviewer** — repo-wide merge rights, co-reviews all PRs, owns a specific domain (analytics or mobile, TBD)
+- **Module Maintainers** — merge rights scoped to their owned module, granted via `CODEOWNERS`; promoted from contributors who've shown consistent, trustworthy work in that domain. Names to be assigned as the team grows.
+- **Contributors** — assigned to specific modules/issues, PR-only, no merge rights, not general-purpose
+
+Module-scoped merge rights are enforced through a `.github/CODEOWNERS` file mapping directories (e.g. `/apps/api/src/analytics/`, `/apps/mobile/`) to the people who own them, combined with GitHub's "Require review from Code Owners" branch protection setting. This lets a module maintainer approve and merge PRs within their own domain without blocking on the Maintainer or Senior Reviewer, while still requiring a relevant owner's sign-off for anything outside their scope.
+
+**Branch strategy:**
+- `dev` — integration branch; all contributor work merges here first via PR (1 approval, CI passing)
+- `staging` — promoted from `dev` via PR only; auto-deploys to the staging environment on merge (1 approval, CI passing)
+- `main` — promoted from `staging` via PR only; auto-deploys to production on merge (2 approvals required, CI passing)
+
+Branch protection enforces the promotion path directly: `staging` only accepts PRs originating from `dev`, and `main` only accepts PRs originating from `staging`. This prevents a feature branch from skipping straight to production.
 
 **Process:**
 - All work happens via GitHub Issues tied to this PRD's scope. Features not covered by Section 4 require a discussion issue before implementation begins.
-- All changes land via PR. `main` is protected — no direct pushes, 1+ approval required (raised to 2 once the senior reviewer is onboarded).
-- CI must pass (lint + test) before merge.
+- All changes land via PR — no direct pushes to `dev`, `staging`, or `main`.
+- CI must pass (lint + test) before merge, at every stage.
 - Issues are scoped to single modules where possible so contributors at different levels can work in parallel without collision.
 
 **Suggested first-contribution issues** (once scaffold lands): writing tests for `analytics.service.ts`, documenting endpoints with Swagger decorators, building `@kavira/ui` primitives, implementing the mobile event-logging screen.
@@ -284,7 +294,7 @@ V1 is complete when:
 - The background job system successfully runs scheduled Pattern recomputation without manual intervention.
 - Swagger documentation at `/api/docs` accurately reflects every implemented endpoint.
 - Test coverage exists for the analytics computation logic and the auth flow at minimum.
-- At least one contributor outside the core two (Lead + Senior Reviewer) has successfully landed a merged PR.
+- At least one contributor outside the core two (Maintainer + Senior Reviewer) has successfully landed a merged PR.
 - The repository is in a state where it could be made public without embarrassment — clean structure, working CI, accurate README.
 
 V1 is explicitly not measured by user growth, app store presence, or production scale. It is measured by whether the system works end-to-end and whether the contributor experience around it functions as designed.
