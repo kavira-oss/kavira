@@ -22,6 +22,8 @@ Kavira is not a habit-tracking app. Framing it that way places it in a saturated
 - User-facing: *"Understand your patterns. Own your data."*
 - System description: *"Track behavior. Compute patterns. Generate insight."*
 
+- 
+
 ### Why this is worth building
 
 A habit tracker is not worth building in 2026 — the market is mature and dominated by products with years of UX investment and brand recognition. A behavioral data system, positioned as open infrastructure, is worth building because its value is judged differently: by system design, extensibility, and how well it functions as a reference implementation other developers can learn from and build on. Projects in this category (PostHog, Plausible, Unleash) remain relevant for exactly this reason — the code itself, not just the hosted product, is the thing people show up for.
