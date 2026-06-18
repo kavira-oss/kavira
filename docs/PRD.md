@@ -2,7 +2,7 @@
 
 **Status:** Draft v1.0
 **Owner:** Calvin (clinztouch) — Maintainer
-**Last updated:** 2026-06-16 (rev 3 — governance update: CodeRabbit automated review, repo made public)
+**Last updated:** 2026-06-16 (rev 4 — renamed main to prod)
 **License:** Apache 2.0
 **Repository:** github.com/kavira-oss/kavira
 
@@ -274,13 +274,13 @@ Module-scoped merge rights are enforced through a `.github/CODEOWNERS` file mapp
 **Branch strategy:**
 - `dev` — integration branch; all contributor work merges here first via PR (1 approval, CI passing)
 - `staging` — promoted from `dev` via PR only; auto-deploys to the staging environment on merge (1 approval, CI passing)
-- `main` — promoted from `staging` via PR only; auto-deploys to production on merge. Requires 1 approval (Maintainer) while the Senior Reviewer role is unfilled; rises to 2 approvals once it is filled. CI must pass at every stage.
+- `prod` — promoted from `staging` via PR only; auto-deploys to production on merge. Requires 1 approval (Maintainer) while the Senior Reviewer role is unfilled; rises to 2 approvals once it is filled. CI must pass at every stage.
 
-Branch protection enforces the promotion path directly: `staging` only accepts PRs originating from `dev`, and `main` only accepts PRs originating from `staging`. This prevents a feature branch from skipping straight to production.
+Branch protection enforces the promotion path directly: `staging` only accepts PRs originating from `dev`, and `prod` only accepts PRs originating from `staging`. This prevents a feature branch from skipping straight to production.
 
 **Process:**
 - All work happens via GitHub Issues tied to this PRD's scope. Features not covered by Section 4 require a discussion issue before implementation begins.
-- All changes land via PR — no direct pushes to `dev`, `staging`, or `main`.
+- All changes land via PR — no direct pushes to `dev`, `staging`, or `prod`.
 - CI must pass (lint + test) before merge, at every stage.
 - **CodeRabbit** is installed on the repo as an automated first-pass reviewer. It posts an AI-generated summary and inline comments on every PR automatically, catching bugs, security issues, and style problems before a human reviewer sees the PR. CodeRabbit does not have merge rights and does not replace human review — it is a complement to CI, not a replacement for it.
 - Accidentally committed secrets or API keys are caught automatically via CodeRabbit's Gitleaks integration, which runs on every PR.
