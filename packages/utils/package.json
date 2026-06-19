@@ -1,0 +1,19 @@
+{
+  "name": "@kavira/utils",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared utility functions for Kavira",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint 'src/**/*.ts'"
+  },
+  "dependencies": {
+    "@kavira/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

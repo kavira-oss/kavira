@@ -1,0 +1,13 @@
+{
+  "name": "@kavira/ui",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared UI component library for Kavira web and mobile",
+  "main": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint 'src/**/*.ts'"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
