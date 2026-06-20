@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+// Use runtime require to avoid TypeScript resolving issues in some CI environments
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Prisma = require('@prisma/client');
 
 describe('UsersService', () => {
   let service: UsersService;
