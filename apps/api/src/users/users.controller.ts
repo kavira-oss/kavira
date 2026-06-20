@@ -20,12 +20,19 @@ export class UsersController {
  @Post()
 async create(@Body() body: CreateUserDto) {
   const passwordHash = await bcrypt.hash(body.password, 10);
-  return this.usersService.create({
+  const created = await this.usersService.create({
     email: body.email,
     username: body.username,
     passwordHash,
     name: body.name,
   });
+
+  return {
+    id: created.id,
+    email: created.email,
+    username: created.username,
+    name: created.name,
+  };
 }
 
   @Delete(':id')

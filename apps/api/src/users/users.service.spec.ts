@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let prisma: { user: Record<string, jest.Mock> };
+  let prisma: any;
 
   beforeEach(async () => {
     prisma = {
@@ -73,6 +74,22 @@ describe('UsersService', () => {
       expect(result).toEqual(created);
       expect(prisma.user.create).toHaveBeenCalledWith({ data });
     });
+
+    it('throws ConflictException when unique constraint violation occurs', async () => {
+      const data = {
+        email: 'dup@test.com',
+        username: 'dupuser',
+        passwordHash: 'hashed',
+      };
+
+      // create an object that passes the `instanceof Prisma.PrismaClientKnownRequestError` check
+      const prismaErr = Object.create(Prisma.PrismaClientKnownRequestError.prototype);
+      prismaErr.code = 'P2002';
+
+      prisma.user.create.mockRejectedValue(prismaErr);
+
+      await expect(service.create(data)).rejects.toThrow(ConflictException);
+    });
   });
 
   describe('remove', () => {
@@ -85,6 +102,12 @@ describe('UsersService', () => {
 
       expect(result).toEqual(user);
       expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: '1' } });
+    });
+
+    it('throws NotFoundException when removing a non-existing user', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.remove('missing')).rejects.toThrow(NotFoundException);
     });
   });
 });
