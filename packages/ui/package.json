@@ -4,9 +4,7 @@
   "private": true,
   "description": "Shared UI component library for Kavira web and mobile",
   "main": "./src/index.ts",
-  "scripts": {
-    "lint": "eslint 'src/**/*.ts'"
-  },
+  "scripts": {},
   "devDependencies": {
     "typescript": "^5.7.2"
   }
