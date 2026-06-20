@@ -15,9 +15,9 @@ export class UsersService {
     return user;
   }
 
-  create(data: { email: string; name?: string }) {
-    return this.prisma.user.create({ data });
-  }
+ create(data: { email: string; username: string; passwordHash: string; name?: string }) {
+  return this.prisma.user.create({ data });
+}
 
   async remove(id: string) {
     await this.findOne(id);
