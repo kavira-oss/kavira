@@ -70,7 +70,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
-        run: pnpm --filter @kavira/api db:generate
+        run: pnpm --filter api prisma:generate
         env:
           DATABASE_URL: postgresql://kavira:kavira@localhost:5432/kavira_test
 
