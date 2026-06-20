@@ -2,7 +2,31 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+
+// jest.mock is hoisted above imports, so the class must be defined
+// inside the factory function — not referenced from outer scope
+jest.mock('@prisma/client', () => {
+  class PrismaClientKnownRequestError extends Error {
+    code: string;
+    clientVersion: string;
+    constructor(
+      message: string,
+      { code, clientVersion }: { code: string; clientVersion: string },
+    ) {
+      super(message);
+      this.name = 'PrismaClientKnownRequestError';
+      this.code = code;
+      this.clientVersion = clientVersion;
+    }
+  }
+
+  class PrismaClient {}
+
+  return {
+    PrismaClient,
+    Prisma: { PrismaClientKnownRequestError },
+  };
+});
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -82,11 +106,12 @@ describe('UsersService', () => {
         passwordHash: 'hashed',
       };
 
-      // create an object that passes the `instanceof Prisma.PrismaClientKnownRequestError` check
-     const prismaErr = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-  code: 'P2002',
-  clientVersion: '7.8.0',
-  });
+      // Retrieve the mocked class from the mocked module
+      const { Prisma } = jest.requireMock('@prisma/client');
+      const prismaErr = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint failed',
+        { code: 'P2002', clientVersion: '7.8.0' },
+      );
 
       prisma.user.create.mockRejectedValue(prismaErr);
 
