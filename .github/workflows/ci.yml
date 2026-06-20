@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
           version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -53,17 +53,17 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
           version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Prisma client
-        run: pnpm --filter @kavira/api db:generate
+        run: pnpm --filter api db:generate
         env:
           DATABASE_URL: postgresql://kavira:kavira@localhost:5432/kavira_test
       - name: Run tests
