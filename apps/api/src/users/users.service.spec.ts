@@ -1,0 +1,140 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException, ConflictException } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { PrismaService } from '../prisma/prisma.service';
+
+// jest.mock is hoisted above imports, so the class must be defined
+// inside the factory function — not referenced from outer scope
+jest.mock('@prisma/client', () => {
+  class PrismaClientKnownRequestError extends Error {
+    code: string;
+    clientVersion: string;
+    constructor(
+      message: string,
+      { code, clientVersion }: { code: string; clientVersion: string },
+    ) {
+      super(message);
+      this.name = 'PrismaClientKnownRequestError';
+      this.code = code;
+      this.clientVersion = clientVersion;
+    }
+  }
+
+  class PrismaClient {}
+
+  return {
+    PrismaClient,
+    Prisma: { PrismaClientKnownRequestError },
+  };
+});
+
+describe('UsersService', () => {
+  let service: UsersService;
+  let prisma: any;
+
+  beforeEach(async () => {
+    prisma = {
+      user: {
+        findMany: jest.fn(),
+        findUnique: jest.fn(),
+        create: jest.fn(),
+        delete: jest.fn(),
+      },
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: PrismaService, useValue: prisma },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+  });
+
+  describe('findAll', () => {
+    it('returns all users', async () => {
+      const users = [{ id: '1', email: 'a@test.com' }];
+      prisma.user.findMany.mockResolvedValue(users);
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(users);
+      expect(prisma.user.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('returns a user when found', async () => {
+      const user = { id: '1', email: 'a@test.com' };
+      prisma.user.findUnique.mockResolvedValue(user);
+
+      const result = await service.findOne('1');
+
+      expect(result).toEqual(user);
+    });
+
+    it('throws NotFoundException when user does not exist', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.findOne('missing-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('create', () => {
+    it('creates a user', async () => {
+      const data = {
+        email: 'new@test.com',
+        username: 'newuser',
+        passwordHash: 'hashed',
+      };
+      const created = { id: '1', ...data };
+      prisma.user.create.mockResolvedValue(created);
+
+      const result = await service.create(data);
+
+      expect(result).toEqual(created);
+      expect(prisma.user.create).toHaveBeenCalledWith({ data });
+    });
+
+    it('throws ConflictException when unique constraint violation occurs', async () => {
+      const data = {
+        email: 'dup@test.com',
+        username: 'dupuser',
+        passwordHash: 'hashed',
+      };
+
+      // Retrieve the mocked class from the mocked module
+      const { Prisma } = jest.requireMock('@prisma/client');
+      const prismaErr = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint failed',
+        { code: 'P2002', clientVersion: '7.8.0' },
+      );
+
+      prisma.user.create.mockRejectedValue(prismaErr);
+
+      await expect(service.create(data)).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('remove', () => {
+    it('removes a user after confirming it exists', async () => {
+      const user = { id: '1', email: 'a@test.com' };
+      prisma.user.findUnique.mockResolvedValue(user);
+      prisma.user.delete.mockResolvedValue(user);
+
+      const result = await service.remove('1');
+
+      expect(result).toEqual(user);
+      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: '1' } });
+    });
+
+    it('throws NotFoundException when removing a non-existing user', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.remove('missing')).rejects.toThrow(NotFoundException);
+    });
+  });
+});
