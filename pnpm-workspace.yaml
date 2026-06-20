@@ -8,3 +8,10 @@ allowBuilds:
   '@scarf/scarf': false
   bcrypt: false
   prisma: true
+  unrs-resolver: true
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
