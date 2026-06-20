@@ -2,9 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
-// Use runtime require to avoid TypeScript resolving issues in some CI environments
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Prisma = require('@prisma/client');
+import { Prisma } from '@prisma/client';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -85,8 +83,10 @@ describe('UsersService', () => {
       };
 
       // create an object that passes the `instanceof Prisma.PrismaClientKnownRequestError` check
-      const prismaErr = Object.create(Prisma.PrismaClientKnownRequestError.prototype);
-      prismaErr.code = 'P2002';
+     const prismaErr = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+  code: 'P2002',
+  clientVersion: '7.8.0',
+  });
 
       prisma.user.create.mockRejectedValue(prismaErr);
 
