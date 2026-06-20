@@ -4,30 +4,62 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+
 }
 
+// ─── Enums ─
+enum BehaviorFrequency {
+  DAILY
+  WEEKDAYS
+  WEEKENDS
+  CUSTOM
+}
+
+enum BehaviorCategory {
+  HEALTH
+  FITNESS
+  LEARNING
+  MINDFULNESS
+  PRODUCTIVITY
+  SOCIAL
+  OTHER
+}
+
+// ─── Models 
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  username  String   @unique
   name      String?
+
+  // Auth
+  passwordHash               String
+  isVerified                 Boolean   @default(false)
+  verificationToken          String?
+  verificationTokenExpires   DateTime?
+  resetPasswordToken         String?
+  resetPasswordExpires       DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   sessions  Session[]
   behaviors Behavior[]
 
+  @@index([email])
+  @@index([username])
   @@map("users")
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  refreshToken String   @unique
+  id           String    @id @default(cuid())
+  refreshToken String    @unique
   deviceInfo   String?
   ipAddress    String?
   expiresAt    DateTime
   revokedAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -37,33 +69,37 @@ model Session {
 }
 
 model Behavior {
-  id          String    @id @default(cuid())
+  id          String            @id @default(cuid())
   title       String
   description String?
+  category    BehaviorCategory  @default(OTHER)
+  frequency   BehaviorFrequency @default(DAILY)
   archivedAt  DateTime?
   deletedAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   userId String
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   events Event[]
 
   @@index([userId])
   @@index([deletedAt])
+  @@index([archivedAt])
   @@map("behaviors")
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  occurredAt  DateTime @default(now())
-  metadata    Json?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  occurredAt DateTime @default(now())
+  metadata   Json?
+  createdAt  DateTime @default(now())
 
   behaviorId String
   behavior   Behavior @relation(fields: [behaviorId], references: [id], onDelete: Cascade)
 
   @@index([behaviorId])
   @@index([occurredAt])
+  @@index([behaviorId, occurredAt])
   @@map("events")
 }
