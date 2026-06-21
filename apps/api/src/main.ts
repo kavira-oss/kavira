@@ -10,8 +10,10 @@ import { ValidationPipe } from '@nestjs/common';
 // racing (autoSelectFamily) treats the instant IPv6 ENETUNREACH as a signal
 // that corrupts the race timing, so the otherwise-healthy IPv4 attempt to
 // Neon also reports ETIMEDOUT. Force single-family, IPv4-first connects.
-setDefaultResultOrder('ipv4first');
-setDefaultAutoSelectFamily(false);
+if (process.env.FORCE_IPV4_FIRST === 'true') {
+  setDefaultResultOrder('ipv4first');
+  setDefaultAutoSelectFamily(false);
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
