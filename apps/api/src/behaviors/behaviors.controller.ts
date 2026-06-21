@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { BehaviorsService } from './behaviors.service';
+import { CreateBehaviorDto } from './dto/create-behavior.dto';
 
 @Controller('behaviors')
 export class BehaviorsController {
@@ -16,7 +17,7 @@ export class BehaviorsController {
   }
 
   @Post()
-  create(@Body() body: { userId: string; title: string; description?: string }) {
+  create(@Body() body: CreateBehaviorDto) {
     return this.behaviorsService.create(body);
   }
 

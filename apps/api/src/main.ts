@@ -1,9 +1,17 @@
 import 'dotenv/config';
+import { setDefaultResultOrder } from 'node:dns';
+import { setDefaultAutoSelectFamily } from 'node:net';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
+// This host has no working IPv6 route. Node's Happy Eyeballs dual-stack
+// racing (autoSelectFamily) treats the instant IPv6 ENETUNREACH as a signal
+// that corrupts the race timing, so the otherwise-healthy IPv4 attempt to
+// Neon also reports ETIMEDOUT. Force single-family, IPv4-first connects.
+setDefaultResultOrder('ipv4first');
+setDefaultAutoSelectFamily(false);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
