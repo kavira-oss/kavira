@@ -1,4 +1,4 @@
-import { IsString, MinLength, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
 
 export class CreateBehaviorDto {
   @IsString()

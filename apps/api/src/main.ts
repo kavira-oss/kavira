@@ -6,10 +6,11 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
-// This host has no working IPv6 route. Node's Happy Eyeballs dual-stack
-// racing (autoSelectFamily) treats the instant IPv6 ENETUNREACH as a signal
-// that corrupts the race timing, so the otherwise-healthy IPv4 attempt to
-// Neon also reports ETIMEDOUT. Force single-family, IPv4-first connects.
+// Opt-in workaround for hosts with no working IPv6 route: Node's Happy Eyeballs
+// dual-stack racing (autoSelectFamily) treats the instant IPv6 ENETUNREACH as
+// a signal that corrupts the race timing, so an otherwise-healthy IPv4 attempt
+// can also report ETIMEDOUT. Not safe to force on environments that rely on
+// IPv6 or dual-stack, so this only applies when explicitly enabled.
 if (process.env.FORCE_IPV4_FIRST === 'true') {
   setDefaultResultOrder('ipv4first');
   setDefaultAutoSelectFamily(false);
