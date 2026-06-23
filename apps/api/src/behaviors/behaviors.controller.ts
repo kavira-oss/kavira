@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { BehaviorsService } from './behaviors.service';
+import { CreateBehaviorDto } from './dto/create-behavior.dto';
 
 @Controller('behaviors')
 export class BehaviorsController {
@@ -15,9 +16,11 @@ export class BehaviorsController {
     return this.behaviorsService.findOne(id);
   }
 
-  @Post()
-  create(@Body() body: { userId: string; title: string; description?: string }) {
-    return this.behaviorsService.create(body);
+  // TODO(#3): switch to req.user.id once the auth guard lands; userId via
+  // route param is a temporary IDOR-prone stand-in until then.
+  @Post('user/:userId')
+  create(@Param('userId') userId: string, @Body() body: CreateBehaviorDto) {
+    return this.behaviorsService.create({ ...body, userId });
   }
 
   @Patch(':id/archive')
