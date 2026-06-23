@@ -74,6 +74,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://kavira:kavira@localhost:5432/kavira_test
 
+      - name: Build utils
+        run: pnpm --filter @kavira/utils build
+        env:
+          DATABASE_URL: postgresql://kavira:kavira@localhost:5432/kavira_test
       - name: Run tests
         run: pnpm --filter api test
         env:
