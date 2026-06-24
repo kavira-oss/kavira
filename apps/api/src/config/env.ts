@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { z } from 'zod';
 
 config({
-    path: resolve(__dirname, '../../.env')
+    path: resolve(process.cwd(), '../../.env')
 });
 
 export const env = createEnv({
@@ -43,7 +43,7 @@ export const env = createEnv({
             .min(32, 'JWT_REFRESH_SECRET must be at least chars'),
         JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
-        EMAIL_HOST: z.url(),
+        EMAIL_HOST: z.hostname(),
         EMAIL_PORT: z.coerce.number().int().positive().default(587),
         EMAIL_USER: z.email().default('kavira@kavira.com'),
         EMAIL_PASS: z.string(),
