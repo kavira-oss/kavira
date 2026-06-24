@@ -39,6 +39,7 @@ model User {
   verificationTokenExpires   DateTime?
   resetPasswordToken         String?
   resetPasswordExpires       DateTime?
+  refreshTokenHash           String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
