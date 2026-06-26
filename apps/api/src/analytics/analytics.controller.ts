@@ -11,4 +11,11 @@ export class AnalyticsController {
   getStreak(@Param('userId') userId: string) {
     return this.analyticsService.getStreakForUser(userId);
   }
+
+  // TODO(#3): once the auth guard lands, verify the requesting user owns
+  // this behavior before returning its completion rate (IDOR otherwise).
+  @Get('completion-rate/:behaviorId')
+  getCompletionRate(@Param('behaviorId') behaviorId: string) {
+    return this.analyticsService.getCompletionRate(behaviorId);
+  }
 }
