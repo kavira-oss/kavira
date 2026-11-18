@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
+import { BehaviorFrequency } from '@prisma/client';
 import { AnalyticsService } from './analytics.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -19,6 +21,9 @@ describe('AnalyticsService', () => {
     prisma = {
       event: {
         findMany: jest.fn(),
+      },
+      behavior: {
+        findFirst: jest.fn(),
       },
     };
 
@@ -76,6 +81,75 @@ describe('AnalyticsService', () => {
       const result = await service.getStreakForUser('user-1');
 
       expect(result).toEqual({ currentStreak: 2, longestStreak: 2 });
+    });
+  });
+
+  describe('getCompletionRate', () => {
+    // Behavior created 4 days ago + today = a fixed 5-day expected window
+    // (DAILY frequency, so every day in the window is expected).
+    const behavior = {
+      id: 'behavior-1',
+      frequency: BehaviorFrequency.DAILY,
+      createdAt: daysAgo(4),
+    };
+
+    it('throws NotFoundException when the behavior does not exist', async () => {
+      prisma.behavior.findFirst.mockResolvedValue(null);
+
+      await expect(service.getCompletionRate('missing-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('returns a 0% rate when there are no events', async () => {
+      prisma.behavior.findFirst.mockResolvedValue(behavior);
+      prisma.event.findMany.mockResolvedValue([]);
+
+      const result = await service.getCompletionRate('behavior-1');
+
+      expect(result).toEqual({
+        behaviorId: 'behavior-1',
+        completionRate: 0,
+        expectedDays: 5,
+        completedDays: 0,
+      });
+    });
+
+    it('returns a partial rate when only some expected days are completed', async () => {
+      prisma.behavior.findFirst.mockResolvedValue(behavior);
+      prisma.event.findMany.mockResolvedValue([
+        { occurredAt: daysAgo(4) },
+        { occurredAt: daysAgo(2) },
+      ]);
+
+      const result = await service.getCompletionRate('behavior-1');
+
+      expect(result).toEqual({
+        behaviorId: 'behavior-1',
+        completionRate: 40, // 2 of 5 expected days
+        expectedDays: 5,
+        completedDays: 2,
+      });
+    });
+
+    it('returns a 100% rate when every expected day is completed', async () => {
+      prisma.behavior.findFirst.mockResolvedValue(behavior);
+      prisma.event.findMany.mockResolvedValue([
+        { occurredAt: daysAgo(4) },
+        { occurredAt: daysAgo(3) },
+        { occurredAt: daysAgo(2) },
+        { occurredAt: daysAgo(1) },
+        { occurredAt: daysAgo(0) },
+      ]);
+
+      const result = await service.getCompletionRate('behavior-1');
+
+      expect(result).toEqual({
+        behaviorId: 'behavior-1',
+        completionRate: 100,
+        expectedDays: 5,
+        completedDays: 5,
+      });
     });
   });
 });
