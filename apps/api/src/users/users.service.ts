@@ -1,6 +1,7 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { SYS_MSG } from 'src/common/constants/sys-msg';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,11 @@ export class UsersService {
     return user;
   }
 
+  async findUserByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    return user;
+  }
+
   async create(data: { email: string; username: string; passwordHash: string; name?: string }) {
     try {
       return await this.prisma.user.create({ data });
@@ -28,6 +34,15 @@ export class UsersService {
       }
       throw error;
     }
+  }
+
+  async setRefreshTokenHash(id: string, hash: string | null): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        refreshTokenHash: hash,
+      }
+    })
   }
 
   async remove(id: string) {

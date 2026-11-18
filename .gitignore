@@ -10,8 +10,6 @@ coverage/
 *.tsbuildinfo
 
 # Environment
-.env
-.env.*
 !.env.example
 
 # OS
@@ -20,7 +18,6 @@ coverage/
 Thumbs.db
 
 # Editors
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -37,3 +34,4 @@ prisma/*.db-journal
 
 # Turbo
 .turbo/
+config.bat
